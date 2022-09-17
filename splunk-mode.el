@@ -49,8 +49,13 @@
 ;; TODO: Add highlighting of other keywords
 ;;         - Digits?
 ;;         - Operators?
+;;         - Macro parameters
 ;;         - Variables
 ;;         - Comparison or assignment
+;;         - Double-quoted
+;;         - Single-quoted
+;;         - Embedded block
+;;         - Block comment
 ;; TODO: Gix group matching macros
 ;; TODO: Correct regex construction
 ;; TODO: Make keyword highlighting more similar to official splunk
