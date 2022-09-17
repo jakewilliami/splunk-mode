@@ -48,7 +48,7 @@
 
 ;; TODO: Add highlighting of other keywords
 ;;         - Digits?
-;;         - Operators
+;;         - Operators?
 ;;         - Variables
 ;;         - Comparison or assignment
 ;; TODO: Gix group matching macros
@@ -66,16 +66,27 @@
 
 (defvar splunk-mode-hook nil)
 
-;; (defgroup splunk ()
-  ;; "Major mode for Splunk source code."
-  ;; :group 'languages
-  ;; :prefix "splunk-")
+(defgroup splunk-mode ()
+  "Major mode for Splunk SPL code."
+  :link '(url-link "https://docs.splunk.com/")
+  :group 'languages
+  :prefix "splunk-")
 
 ;;; Faces
 
 (defface splunk-digits-face
   '((t :inherit default))
-  "Face for digits in splunk"
+  "Face for digits in Splunk."
+  :group 'splunk-mode)
+
+(defface splunk-escape-chars-face
+  '((t :inherit font-lock-constant-face))
+  "Face for escape characters in Splunk."
+  :group 'splunk-mode)
+
+(defface splunk-operators-face
+  '((t :weight bold :inherit font-lock-builtin-face))
+  "Face for operators in Splunk."
   :group 'splunk-mode)
 
 ;;; Syntax
@@ -147,7 +158,9 @@
   (defconst splunk-digits-regexp ;; "\\b(\\d+)\\b"
      (rx word-boundary (group (one-or-more digit)) word-boundary))
   (defconst splunk-escape-chars-regexp ;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
-     (rx (or "\\\\" "\\*" "\\|" "\\="))))
+     (rx (group (or "\\\\" "\\*" "\\|" "\\="))))
+  (defconst splunk-operators-regexp ;; "(\\|,)"
+     (rx (group (or "\\" ",")))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-highlights
@@ -157,7 +170,8 @@
     (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)
      ,(cons splunk-macro-names-regexp font-lock-function-name-face)
      ,(cons splunk-digits-regexp 'splunk-digits-face)
-     ,(cons splunk-escape-chars-regexp font-lock-constant-face)))
+     ,(cons splunk-escape-chars-regexp 'splunk-escape-chars-face)
+     ,(cons splunk-operators-regexp 'splunk-operators-face)))
 
 ;;; Mode
 
