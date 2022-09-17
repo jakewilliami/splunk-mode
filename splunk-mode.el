@@ -37,10 +37,11 @@
 ;; SPL: Search/Aboutthesearchlanguage
 ;; SPL Syntax: SearchReference/UnderstandingSPLsyntax
 
-;; TODO: Add highlighting 
+;; TODO: Add highlighting of other keywords
+;; TODO: Correct regex construction
+;; TODO: Case insenstitive for constants
 ;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
-;; I think tuareg-mode can do that with similar end-like block, we try
-;; to steal their approach
+;;       within subsearches
 
 
 (defvar splunk-mode-hook nil)
@@ -118,8 +119,12 @@
   ;; (defconst splunk-comparison-or-assignment '())
 )
 
+;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-highlights
-  `((,(regexp-opt splunk-builtin-functions 'symbols) . font-lock-keyword-face)))
+  `((,(regexp-opt splunk-builtin-functions 'symbols) . font-lock-builtin-face)
+    (,(regexp-opt splunk-eval-functions 'symbols) . font-lock-function-name-face)
+    (,(regexp-opt splunk-transforming-functions 'symbols) . font-lock-keyword-face)
+    (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)))
 
 ;;;###autoload
 (define-derived-mode splunk-mode prog-mode "splunk"
