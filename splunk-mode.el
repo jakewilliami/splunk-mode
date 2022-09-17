@@ -145,7 +145,9 @@
   (defconst splunk-macro-names-regexp ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
      (rx "`" (group (one-or-more word)) (or "`" "(")))
   (defconst splunk-digits-regexp ;; "\\b(\\d+)\\b"
-     (rx word-boundary (group (one-or-more digit)) word-boundary)))
+     (rx word-boundary (group (one-or-more digit)) word-boundary))
+  (defconst splunk-escape-chars-regexp ;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
+     (rx (or "\\\\" "\\*" "\\|" "\\="))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-highlights
@@ -154,7 +156,8 @@
     (,(regexp-opt splunk-transforming-functions 'symbols) . font-lock-keyword-face)
     (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)
      ,(cons splunk-macro-names-regexp font-lock-function-name-face)
-     ,(cons splunk-digits-regexp 'splunk-digits-face)))
+     ,(cons splunk-digits-regexp 'splunk-digits-face)
+     ,(cons splunk-escape-chars-regexp font-lock-constant-face)))
 
 ;;; Mode
 
