@@ -1,4 +1,4 @@
-;;; splunk-mode.el --- Major Mode for editing Splunk SPL source code -*- lexical-binding: t -*-
+;;; splunk-mode.el --- Major Mode for editing Splunk Search Processing Language (SPL) source code -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022 Jake Ireland <jakewilliami@icloud.com>
 
@@ -6,7 +6,16 @@
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
 ;; URL: https://github.com/jakewilliami/splunk-mode
 ;; Keywords: languages
+;; Package-Requires: ((emacs "23"))
 
+;;; Usage:
+;;
+;; Put the following code in your .emacs, site-load.el, or other relevant file
+;; (add-to-list 'load-path "path-to-splunk-mode")
+;; (require 'splunk-mode)
+
+;;; License:
+;;
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
 ;; files (the "Software"), to deal in the Software without
@@ -14,10 +23,10 @@
 ;; modify, merge, publish, distribute, sublicense, and/or sell copies
 ;; of the Software, and to permit persons to whom the Software is
 ;; furnished to do so, subject to the following conditions:
-
+;;
 ;; The above copyright notice and this permission notice shall be
 ;; included in all copies or substantial portions of the Software.
-
+;;
 ;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
 ;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 ;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
@@ -38,11 +47,23 @@
 ;; SPL Syntax: SearchReference/UnderstandingSPLsyntax
 
 ;; TODO: Add highlighting of other keywords
+;;         - Macros
+;;         - Digits
+;;         - Operators
+;;         - Variables
+;;         - Comparison or assignment
+;; TODO: Gix group matching macros
 ;; TODO: Correct regex construction
+;; TODO: Make keyword highlighting more similar to official splunk
+;;       highlighting (i.e., most things are function highlihgts)
 ;; TODO: Case insenstitive for constants
+;; TODO: Linting/indentation suggestion (similar behaviour to 
+;;       julia-mode)
+;; TODO: Autocomplete
 ;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
 ;;       within subsearches
 
+;;; Code:
 
 (defvar splunk-mode-hook nil)
 
@@ -110,28 +131,30 @@
        "list" "values" "earliest" "earliest_time" "latest"
        "latest_time" "per_day" "per_hour" "per_minute" "per_second"
        "rate"))
-  ;; (defconst splunk-macro-names '())
-  ;; (defconst splunk-operators '())
   (defconst splunk-language-constants
      '("as" "by" "or" "and" "over" "where" "output" "outputnew" "NOT"
        "true" "false"))
-  ;; (defconst splunk-variables '())
-  ;; (defconst splunk-comparison-or-assignment '())
-)
+  (defconst splunk-macro-names-regexp ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
+     (rx "`" (group (one-or-more word)) (or "`" "("))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-highlights
   `((,(regexp-opt splunk-builtin-functions 'symbols) . font-lock-builtin-face)
     (,(regexp-opt splunk-eval-functions 'symbols) . font-lock-function-name-face)
     (,(regexp-opt splunk-transforming-functions 'symbols) . font-lock-keyword-face)
-    (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)))
+    (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)
+     ,(cons splunk-macro-names-regexp font-lock-function-name-face)))
+
+  ;; (defconst splunk-operators '())
+  ;; (defconst splunk-variables '())
+  ;; (defconst splunk-comparison-or-assignment '())
 
 ;;;###autoload
 (define-derived-mode splunk-mode prog-mode "splunk"
-  "Major Mode for editing Splunk source code."
+  "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
   (setq font-lock-defaults '(splunk-highlights))
-  (setq-local comment-start "// "))
+  (setq-local comment-start "//"))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.spl\\'" . splunk-mode))
