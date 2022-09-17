@@ -47,7 +47,7 @@
 ;; SPL Syntax: SearchReference/UnderstandingSPLsyntax
 
 ;; TODO: Add highlighting of other keywords
-;;         - Digits
+;;         - Digits?
 ;;         - Operators
 ;;         - Variables
 ;;         - Comparison or assignment
@@ -70,6 +70,15 @@
   ;; "Major mode for Splunk source code."
   ;; :group 'languages
   ;; :prefix "splunk-")
+
+;;; Faces
+
+(defface splunk-digits-face
+  '((t :inherit default))
+  "Face for digits in splunk"
+  :group 'splunk-mode)
+
+;;; Syntax
 
 (defconst splunk-mode-syntax-table
   (with-syntax-table (copy-syntax-table)
@@ -134,7 +143,9 @@
      '("as" "by" "or" "and" "over" "where" "output" "outputnew" "NOT"
        "true" "false"))
   (defconst splunk-macro-names-regexp ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
-     (rx "`" (group (one-or-more word)) (or "`" "("))))
+     (rx "`" (group (one-or-more word)) (or "`" "(")))
+  (defconst splunk-digits-regexp ;; "\\b(\\d+)\\b"
+     (rx word-boundary (group (one-or-more digit)) word-boundary)))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-highlights
@@ -142,11 +153,10 @@
     (,(regexp-opt splunk-eval-functions 'symbols) . font-lock-function-name-face)
     (,(regexp-opt splunk-transforming-functions 'symbols) . font-lock-keyword-face)
     (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)
-     ,(cons splunk-macro-names-regexp font-lock-function-name-face)))
+     ,(cons splunk-macro-names-regexp font-lock-function-name-face)
+     ,(cons splunk-digits-regexp 'splunk-digits-face)))
 
-  ;; (defconst splunk-operators '())
-  ;; (defconst splunk-variables '())
-  ;; (defconst splunk-comparison-or-assignment '())
+;;; Mode
 
 ;;;###autoload
 (define-derived-mode splunk-mode prog-mode "splunk"
@@ -162,4 +172,3 @@
 (provide 'splunk-mode)
 
 ;;; splunk-mode.el ends here
-
