@@ -47,7 +47,6 @@
 ;; SPL Syntax: SearchReference/UnderstandingSPLsyntax
 
 ;; TODO: Add highlighting of other keywords
-;;         - Macros
 ;;         - Digits
 ;;         - Operators
 ;;         - Variables
