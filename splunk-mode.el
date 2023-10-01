@@ -62,7 +62,6 @@
 ;; TODO: Correct regex construction
 ;; TODO: Make keyword highlighting more similar to official splunk
 ;;       highlighting (i.e., most things are function highlihgts)
-;; TODO: Fix highlighting with custom type face
 ;; TODO: Linting/indentation suggestion (similar behaviour to 
 ;;       julia-mode)
 ;; TODO: Autocomplete
@@ -85,6 +84,14 @@
   :prefix "splunk-")
 
 ;;; Faces
+
+;; https://emacs.stackexchange.com/questions/3584/
+(defface splunk-language-constants-face
+  ;; '((t :inherit default))
+  '((t :weight bold :inherit font-lock-preprocessor-face))
+  "Face for language constants such as \"as\" and \"by\" in Splunk."
+  :group 'splunk-mode)
+;; (defvar splunk-language-constants-face 'splunk-language-constants-face)
 
 (defface splunk-digits-face
   '((t :inherit default))
@@ -189,7 +196,6 @@
      (rx (group (or "\\" ",")))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
-;;font-lock-preprocessor-face
 (defconst splunk-font-lock-keywords
   (list
    (cons (regexp-opt splunk-builtin-functions 'symbols) 'font-lock-builtin-face)
