@@ -56,8 +56,7 @@
 ;;         - Double-quoted
 ;;         - Single-quoted
 ;;         - Embedded block
-;;         - Block comment
-;;         - Index, sourcetype, etc.
+;;         - Block comment/other comment style (`comment()` macro)
 ;; TODO: Handle parentheses outside of escape characters?
 ;; TODO: Different colour for parentheses (too similar to builtin)
 ;; TODO: Make keyword highlighting more similar to official splunk
@@ -87,7 +86,7 @@
 
 ;; https://emacs.stackexchange.com/questions/3584/
 (defface splunk-language-constants-face
-  '((t :weight bold :inherit font-lock-preprocessor-face))
+  '((t :inherit font-lock-preprocessor-face))
   "Face for language constants such as \"as\" and \"by\" in Splunk."
   :group 'splunk-mode)
 ;; (defvar splunk-language-constants-face 'splunk-language-constants-face)
@@ -110,6 +109,12 @@
   "Face for operators in Splunk."
   :group 'splunk-mode)
 
+(defface splunk-keyword-face
+  '((t :inherit font-lock-function-call-face
+       :weight bold))
+  "Face for keywords (e.g. `sourcetype=*') in Splunk."
+  :group 'splunk-mode)
+
 ;;; Syntax
 
 (defconst splunk-mode-syntax-table
@@ -118,6 +123,7 @@
 	(modify-syntax-entry ?/ ". 124b")
 	(modify-syntax-entry ?* ". 23")
 	(modify-syntax-entry ?\n "> b")
+
     ;; Chars are the same as strings
     (modify-syntax-entry ?' "\"")
     (syntax-table))
@@ -196,7 +202,14 @@
   ;; "(\\|,)"
   (defconst splunk-operators-regexp
      ;; (rx (group (or "\\" ","))))
-     (rx unmatchable)))
+     (rx unmatchable))
+
+  ;; E.g., sourcetype=access_*
+  (defconst splunk-keyword-regexp
+     (rx (and (group (one-or-more word))
+              (optional (one-or-more space))  "=" (optional (one-or-more space))
+              (or (one-or-more digit)
+                  (and (optional "\"") (one-or-more (or "*" word)) (optional "\"")))))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-font-lock-keywords
@@ -208,7 +221,8 @@
    (list splunk-macro-names-regexp 1 font-lock-function-name-face)
    (cons splunk-digits-regexp ''splunk-digits-face)
    (cons splunk-escape-chars-regexp ''splunk-escape-chars-face)
-   (cons splunk-operators-regexp ''splunk-operators-face)))
+   (cons splunk-operators-regexp ''splunk-operators-face)
+   (list splunk-keyword-regexp 1 ''splunk-keyword-face)))
 
 ;;; Mode
 
