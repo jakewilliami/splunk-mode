@@ -58,7 +58,6 @@
 ;;         - Embedded block
 ;;         - Block comment
 ;;         - Index, sourcetype, etc.
-;; TODO: Fix group matching macros
 ;; TODO: Correct regex construction
 ;; TODO: Make keyword highlighting more similar to official splunk
 ;;       highlighting (i.e., most things are function highlihgts)
@@ -142,6 +141,7 @@
       "tscollect" "tstats" "typeahead" "typelearner" "typer" "uniq"
       "untable" "where" "x11" "xmlkv" "xmlunescape" "xpath"
       "xyseries"))
+
   (defconst splunk-eval-functions
      '("abs" "acos" "acosh" "asin" "asinh" "atan" "atan2" "atanh"
        "case" "cidrmatch" "ceiling" "coalesce" "commands" "cos"
@@ -155,6 +155,7 @@
        "spath" "split" "sqrt" "strftime" "strptime" "substr" "tan"
        "tanh" "time" "tonumber" "tostring" "trim" "typeof" "upper"
        "urldecode" "validate"))
+
   (defconst splunk-transforming-functions
      '("avg" "count" "distinct_count" "estdc" "estdc_error" "eval"
        "max" "mean" "median" "min" "mode" "percentile" "range"
@@ -165,13 +166,21 @@
   (defconst splunk-language-constants-lower
      '("as" "by" "or" "and" "over" "where" "output" "outputnew" "not"
        "true" "false"))
-  (defconst splunk-macro-names-regexp ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
-     (rx "`" (group (one-or-more word)) (or "`" "(")))
-  (defconst splunk-digits-regexp ;; "\\b(\\d+)\\b"
+
+  ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
+  (defconst splunk-macro-names-regexp
+     (rx "`" (group (one-or-more word)) (or "(" "`")))
+
+  ;; "\\b(\\d+)\\b"
+  (defconst splunk-digits-regexp
      (rx word-boundary (group (one-or-more digit)) word-boundary))
-  (defconst splunk-escape-chars-regexp ;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
+
+  ;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
+  (defconst splunk-escape-chars-regexp
      (rx (group (or "\\\\" "\\*" "\\|" "\\="))))
-  (defconst splunk-operators-regexp ;; "(\\|,)"
+
+  ;; "(\\|,)"
+  (defconst splunk-operators-regexp
      (rx (group (or "\\" ",")))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
@@ -182,7 +191,7 @@
    (cons (regexp-opt splunk-eval-functions 'symbols) 'font-lock-function-name-face)
    (cons (regexp-opt splunk-transforming-functions 'symbols) 'font-lock-function-name-face)  ;; previously keyword
    (cons (regexp-opt splunk-language-constants 'symbols) ''splunk-language-constants-face)
-   (cons splunk-macro-names-regexp font-lock-function-name-face)
+   (list splunk-macro-names-regexp 1 font-lock-function-name-face)
    (cons splunk-digits-regexp ''splunk-digits-face)
    (cons splunk-escape-chars-regexp ''splunk-escape-chars-face)
    (cons splunk-operators-regexp ''splunk-operators-face)))
