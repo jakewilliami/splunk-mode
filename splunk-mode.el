@@ -58,7 +58,8 @@
 ;;         - Embedded block
 ;;         - Block comment
 ;;         - Index, sourcetype, etc.
-;; TODO: Correct regex construction
+;; TODO: Handle parentheses outside of escape characters?
+;; TODO: Different colour for parentheses (too similar to builtin)
 ;; TODO: Make keyword highlighting more similar to official splunk
 ;;       highlighting (i.e., most things are function highlihgts)
 ;; TODO: Linting/indentation suggestion (similar behaviour to 
@@ -86,7 +87,6 @@
 
 ;; https://emacs.stackexchange.com/questions/3584/
 (defface splunk-language-constants-face
-  ;; '((t :inherit default))
   '((t :weight bold :inherit font-lock-preprocessor-face))
   "Face for language constants such as \"as\" and \"by\" in Splunk."
   :group 'splunk-mode)
@@ -99,6 +99,7 @@
   :group 'splunk-mode)
 
 (defface splunk-escape-chars-face
+  ;; '((t :inherit font-lock-escape-face))  ;; Added too recently
   '((t :inherit font-lock-constant-face))
   "Face for escape characters in Splunk."
   :group 'splunk-mode)
@@ -190,11 +191,12 @@
 
   ;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
   (defconst splunk-escape-chars-regexp
-     (rx (group (or "\\\\" "\\*" "\\|" "\\="))))
+     (rx (group (or "\\\\" "\\*" "\\|" "\\=" "(" ")" "[" "]"))))
 
   ;; "(\\|,)"
   (defconst splunk-operators-regexp
-     (rx (group (or "\\" ",")))))
+     ;; (rx (group (or "\\" ","))))
+     (rx unmatchable)))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-font-lock-keywords
