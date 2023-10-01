@@ -1,9 +1,10 @@
 ;;; splunk-mode.el --- Major Mode for editing Splunk Search Processing Language (SPL) source code -*- lexical-binding: t -*-
-;; Copyright (C) 2023 Jake Ireland <jakewilliami@icloud.com>
+
+;; Copyright (C) 2022–2023 Jake Ireland
 
 ;; Version: 1.0
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
-;; URL: https://github.com/jakewilliami/splunk-mode
+;; URL: https://github.com/jakewilliami/splunk-mode/
 ;; Keywords: languages
 ;; Package-Requires: ((emacs "23"))
 
@@ -61,7 +62,7 @@
 ;; TODO: Correct regex construction
 ;; TODO: Make keyword highlighting more similar to official splunk
 ;;       highlighting (i.e., most things are function highlihgts)
-;; TODO: Case insenstitive for constants
+;; TODO: Fix highlighting with custom type face
 ;; TODO: Linting/indentation suggestion (similar behaviour to 
 ;;       julia-mode)
 ;; TODO: Autocomplete
@@ -163,9 +164,13 @@
        "list" "values" "earliest" "earliest_time" "latest"
        "latest_time" "per_day" "per_hour" "per_minute" "per_second"
        "rate"))
+
+  ;; TODO: improve "case-insensitive" workaround
   (defconst splunk-language-constants-lower
      '("as" "by" "or" "and" "over" "where" "output" "outputnew" "not"
        "true" "false"))
+  (defconst splunk-language-constants
+     (append splunk-language-constants-lower (mapcar 'upcase splunk-language-constants-lower)))
 
   ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
   (defconst splunk-macro-names-regexp
