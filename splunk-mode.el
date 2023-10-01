@@ -1,6 +1,5 @@
 ;;; splunk-mode.el --- Major Mode for editing Splunk Search Processing Language (SPL) source code -*- lexical-binding: t -*-
-
-;; Copyright (C) 2022 Jake Ireland <jakewilliami@icloud.com>
+;; Copyright (C) 2023 Jake Ireland <jakewilliami@icloud.com>
 
 ;; Version: 1.0
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
@@ -14,7 +13,7 @@
 ;; (add-to-list 'load-path "path-to-splunk-mode")
 ;; (require 'splunk-mode)
 
-;;; License:
+;;; Licence:
 ;;
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -40,11 +39,13 @@
 ;;
 ;; Major Mode for editing Splunk Search Processing Language (SPL) source code.
 ;;
-;; Following pages are from 
-;; https://docs.splunk.com/Documentation/Splunk/9.0.1/
+;; Syntax resources:
+;;   - https://github.com/splunk/vscode-extension-splunk/
 ;; 
-;; SPL: Search/Aboutthesearchlanguage
-;; SPL Syntax: SearchReference/UnderstandingSPLsyntax
+;; The following resources are from
+;; https://docs.splunk.com/Documentation/Splunk/9.0.1/:
+;;   - SPL: Search/Aboutthesearchlanguage
+;;   - SPL Syntax: SearchReference/UnderstandingSPLsyntax
 
 ;; TODO: Add highlighting of other keywords
 ;;         - Digits?
@@ -56,7 +57,8 @@
 ;;         - Single-quoted
 ;;         - Embedded block
 ;;         - Block comment
-;; TODO: Gix group matching macros
+;;         - Index, sourcetype, etc.
+;; TODO: Fix group matching macros
 ;; TODO: Correct regex construction
 ;; TODO: Make keyword highlighting more similar to official splunk
 ;;       highlighting (i.e., most things are function highlihgts)
@@ -69,11 +71,16 @@
 
 ;;; Code:
 
+;; Need the following to allow GNU Emacs 19 to compile the file.
+(eval-when-compile
+  (require 'regexp-opt))
+
 (defvar splunk-mode-hook nil)
 
 (defgroup splunk-mode ()
   "Major mode for Splunk SPL code."
   :link '(url-link "https://docs.splunk.com/")
+  :version "0.1"
   :group 'languages
   :prefix "splunk-")
 
@@ -119,8 +126,8 @@
       "eventcount" "eventstats" "extract" "fieldformat" "fields"
       "fieldsummary" "file" "filldown" "fillnull" "findtypes"
       "folderize" "foreach" "format" "from" "gauge" "gentimes"
-      "geostats" "head" "highlight" "history" "input" "inputcsv"
-      "inputlookup" "iplocation" "join" "kmeans" "kvform"
+      "geostats" "head" "highlight" "history" "input" "index"
+      "inputcsv" "inputlookup" "iplocation" "join" "kmeans" "kvform"
       "loadjob" "localize" "localop" "lookup" "makecontinuous"
       "makemv" "makeresults" "map" "metadata" "metasearch"
       "multikv" "multisearch" "mvcombine" "mvexpand" "nomv"
@@ -155,8 +162,8 @@
        "list" "values" "earliest" "earliest_time" "latest"
        "latest_time" "per_day" "per_hour" "per_minute" "per_second"
        "rate"))
-  (defconst splunk-language-constants
-     '("as" "by" "or" "and" "over" "where" "output" "outputnew" "NOT"
+  (defconst splunk-language-constants-lower
+     '("as" "by" "or" "and" "over" "where" "output" "outputnew" "not"
        "true" "false"))
   (defconst splunk-macro-names-regexp ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
      (rx "`" (group (one-or-more word)) (or "`" "(")))
@@ -168,15 +175,17 @@
      (rx (group (or "\\" ",")))))
 
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
-(defconst splunk-highlights
-  `((,(regexp-opt splunk-builtin-functions 'symbols) . font-lock-builtin-face)
-    (,(regexp-opt splunk-eval-functions 'symbols) . font-lock-function-name-face)
-    (,(regexp-opt splunk-transforming-functions 'symbols) . font-lock-keyword-face)
-    (,(regexp-opt splunk-language-constants 'symbols) . font-lock-constant-face)
-     ,(cons splunk-macro-names-regexp font-lock-function-name-face)
-     ,(cons splunk-digits-regexp 'splunk-digits-face)
-     ,(cons splunk-escape-chars-regexp 'splunk-escape-chars-face)
-     ,(cons splunk-operators-regexp 'splunk-operators-face)))
+;;font-lock-preprocessor-face
+(defconst splunk-font-lock-keywords
+  (list
+   (cons (regexp-opt splunk-builtin-functions 'symbols) 'font-lock-builtin-face)
+   (cons (regexp-opt splunk-eval-functions 'symbols) 'font-lock-function-name-face)
+   (cons (regexp-opt splunk-transforming-functions 'symbols) 'font-lock-function-name-face)  ;; previously keyword
+   (cons (regexp-opt splunk-language-constants 'symbols) ''splunk-language-constants-face)
+   (cons splunk-macro-names-regexp font-lock-function-name-face)
+   (cons splunk-digits-regexp ''splunk-digits-face)
+   (cons splunk-escape-chars-regexp ''splunk-escape-chars-face)
+   (cons splunk-operators-regexp ''splunk-operators-face)))
 
 ;;; Mode
 
@@ -184,7 +193,7 @@
 (define-derived-mode splunk-mode prog-mode "splunk"
   "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
-  (setq font-lock-defaults '(splunk-highlights))
+  (setq-local font-lock-defaults '(splunk-font-lock-keywords))
   (setq-local comment-start "//"))
 
 ;;;###autoload
