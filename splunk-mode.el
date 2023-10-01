@@ -49,7 +49,6 @@
 ;;   - SPL Syntax: SearchReference/UnderstandingSPLsyntax
 
 ;; TODO: Add highlighting of other keywords
-;;         - Digits?
 ;;         - Operators?
 ;;         - Macro parameters
 ;;         - Variables
@@ -94,7 +93,8 @@
 ;; (defvar splunk-language-constants-face 'splunk-language-constants-face)
 
 (defface splunk-digits-face
-  '((t :inherit default))
+  ;; '((t :inherit font-lock-number-face))  ;; Added too recently
+  '((t :inherit font-lock-type-face))
   "Face for digits in Splunk."
   :group 'splunk-mode)
 
@@ -104,7 +104,8 @@
   :group 'splunk-mode)
 
 (defface splunk-operators-face
-  '((t :weight bold :inherit font-lock-builtin-face))
+  '((t :inherit font-lock-builtin-face
+       :weight bold))
   "Face for operators in Splunk."
   :group 'splunk-mode)
 
