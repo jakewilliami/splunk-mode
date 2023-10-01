@@ -57,6 +57,7 @@
 ;;         - Single-quoted
 ;;         - Embedded block
 ;;         - Block comment/other comment style (`comment()` macro)
+;; TODO: Allow snake_case keyword arguments
 ;; TODO: Handle parentheses outside of escape characters?
 ;; TODO: Different colour for parentheses (too similar to builtin)
 ;; TODO: Make keyword highlighting more similar to official splunk
@@ -84,12 +85,30 @@
 
 ;;; Faces
 
-;; https://emacs.stackexchange.com/questions/3584/
-(defface splunk-language-constants-face
-  '((t :inherit font-lock-preprocessor-face))
-  "Face for language constants such as \"as\" and \"by\" in Splunk."
+(defface splunk-builtin-functions-face
+  '((t :inherit font-lock-builtin-face))
+  "Face for builtin functions such as `rename' and `table' in Splunk."
   :group 'splunk-mode)
-;; (defvar splunk-language-constants-face 'splunk-language-constants-face)
+
+(defface splunk-eval-functions-face
+  '((t :inherit font-lock-function-name-face))
+  "Face for eval functions such as `abs' and `mvindex' in Splunk."
+  :group 'splunk-mode)
+
+(defface splunk-transforming-functions-face
+  '((t :inherit font-lock-function-name-face))
+  "Face for transforming functions such as `count' and `values' in Splunk."
+  :group 'splunk-mode)
+
+(defface splunk-constants-face
+  '((t :inherit font-lock-preprocessor-face))
+  "Face for language constants such as `as' and `by' in Splunk."
+  :group 'splunk-mode)
+
+(defface splunk-macros-face
+  '((t :inherit font-lock-function-name-face))
+  "Face for macros in Splunk."
+  :group 'splunk-mode)
 
 (defface splunk-digits-face
   ;; '((t :inherit font-lock-number-face))  ;; Added too recently
@@ -214,11 +233,11 @@
 ;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 (defconst splunk-font-lock-keywords
   (list
-   (cons (regexp-opt splunk-builtin-functions 'symbols) 'font-lock-builtin-face)
-   (cons (regexp-opt splunk-eval-functions 'symbols) 'font-lock-function-name-face)
-   (cons (regexp-opt splunk-transforming-functions 'symbols) 'font-lock-function-name-face)  ;; previously keyword
+   (cons (regexp-opt splunk-builtin-functions 'symbols) ''splunk-builtin-functions-face)
+   (cons (regexp-opt splunk-eval-functions 'symbols) ''splunk-eval-functions-face)
+   (cons (regexp-opt splunk-transforming-functions 'symbols) ''splunk-transforming-functions-face)
    (cons (regexp-opt splunk-language-constants 'symbols) ''splunk-language-constants-face)
-   (list splunk-macro-names-regexp 1 font-lock-function-name-face)
+   (list splunk-macro-names-regexp 1 ''splunk-macros-face)
    (cons splunk-digits-regexp ''splunk-digits-face)
    (cons splunk-escape-chars-regexp ''splunk-escape-chars-face)
    (cons splunk-operators-regexp ''splunk-operators-face)
