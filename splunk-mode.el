@@ -66,6 +66,7 @@
 ;; TODO: Autocomplete
 ;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
 ;;       within subsearches
+;; TODO: Different brackets colours when nested
 ;; ======================================
 ;; TODO: (defalias 'jai-parent-mode
 ;;          (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
@@ -107,6 +108,35 @@
   :prefix "splunk-")
 
 ;;; Faces
+;;
+;; Custom font faces for Splunk syntax.
+;;
+;; After some trial and error, and taking inspiration from different places, here are
+;; some possible colour schemes:*
+;;
+;;  ----------------------------------------------------------------------------
+;; | font-lock-*-face  | Apt              | Falcon           | VS Code          |
+;; |-------------------|------------------|------------------|------------------|
+;; | warning           | —                | —                | —                |
+;; | function-name     | Trans/Eval/Macro | Builtin          | Constants        |
+;; | [n] function-call | —                | —                | —                |
+;; | variable-name     | Keyword          | —                | Keyword          |
+;; | [n] variable-use  | —                | —                | —                |
+;; | keyword           | —                | Trans/Eval/Macro | —                |
+;; | type              | —                | Constants        | Trans/Eval/Macro |
+;; | constant          | Constants        | Keyword          | Builtin          |
+;; | builtin           | Builtin          | —                | —                |
+;; | preprocessor      | —                | —                | —                |
+;; | [n] property-name | —                | —                | —                |
+;; | [n] number        | —                | —                | —                |
+;; | [n] escape        | —                | —                | —                |
+;;  ----------------------------------------------------------------------------
+;;
+;; Note: font-lock faces prefixed with [n] have been considered too new to use here,
+;; as they do not yet have enough widespread support.
+;;
+;; Ref:
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 
 (defface splunk-comment-face
   '((t :inherit font-lock-comment-face))
@@ -115,27 +145,44 @@
 
 (defface splunk-builtin-functions-face
   '((t :inherit font-lock-builtin-face))
-  "Face for builtin functions such as `rename' and `table' in Splunk."
+  ;; '((t :inherit font-lock-function-name-face))
+  ;; '((t :inherit font-lock-constant-face))
+  "Face for builtin functions such as `rename', `table', and `stat' in Splunk."
   :group 'splunk-mode)
 
 (defface splunk-eval-functions-face
   '((t :inherit font-lock-function-name-face))
+  ;; '((t :inherit font-lock-keyword-face))
+  ;; '((t :inherit font-lock-type-face))
   "Face for eval functions such as `abs' and `mvindex' in Splunk."
   :group 'splunk-mode)
 
 (defface splunk-transforming-functions-face
   '((t :inherit font-lock-function-name-face))
+  ;; '((t :inherit font-lock-keyword-face))
+  ;; '((t :inherit font-lock-type-face))
   "Face for transforming functions such as `count' and `values' in Splunk."
   :group 'splunk-mode)
 
 (defface splunk-constants-face
-  '((t :inherit font-lock-preprocessor-face))
+  '((t :inherit font-lock-constant-face))
+  ;; '((t :inherit font-lock-type-face))
+  ;; '((t :inherit font-lock-function-name-face))
   "Face for language constants such as `as' and `by' in Splunk."
   :group 'splunk-mode)
 
 (defface splunk-macros-face
   '((t :inherit font-lock-function-name-face))
+  ;; '((t :inherit font-lock-keyword-face))
+  ;; '((t :inherit font-lock-type-face))
   "Face for macros in Splunk."
+  :group 'splunk-mode)
+
+(defface splunk-keyword-face
+  '((t :inherit font-lock-variable-name-face))
+  ;; '((t :inherit font-lock-constant-face))
+  ;; '((t :inherit font-lock-variable-name-face))
+  "Face for keywords (e.g. `sourcetype=*') in Splunk."
   :group 'splunk-mode)
 
 (defface splunk-digits-face
@@ -154,12 +201,6 @@
   '((t :inherit font-lock-builtin-face
        :weight bold))
   "Face for operators in Splunk."
-  :group 'splunk-mode)
-
-(defface splunk-keyword-face
-  '((t :inherit font-lock-function-call-face
-       :weight bold))
-  "Face for keywords (e.g. `sourcetype=*') in Splunk."
   :group 'splunk-mode)
 
 ;;; Syntax
@@ -259,7 +300,7 @@
    ;; (rx (group (or "\\" ","))))
    (rx unmatchable))
 
-;; E.g., sourcetype=access_*
+;; E.g., `sourcetype=access_*'
 (defconst splunk-keyword-regexp
    (rx (and (group (one-or-more splunk-word))
             (optional (one-or-more space))  "=" (optional (one-or-more space))
