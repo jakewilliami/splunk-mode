@@ -57,7 +57,6 @@
 ;;         - Comparison or assignment
 ;;         - Do we need single quotes?
 ;;         - Embedded block
-;; TODO: Allow snake_case keyword arguments
 ;; TODO: Handle parentheses outside of escape characters?
 ;; TODO: Different colour for parentheses (too similar to builtin)
 ;; TODO: Make keyword highlighting more similar to official splunk
@@ -95,6 +94,7 @@
 
 ;; Need the following to allow GNU Emacs 19 to compile the file.
 (eval-when-compile
+  (require 'rx)
   (require 'regexp-opt))
 
 (defvar splunk-mode-hook nil)
@@ -232,45 +232,55 @@
      '("as" "by" "or" "and" "over" "where" "output" "outputnew" "not"
        "true" "false"))
   (defconst splunk-language-constants
-     (append splunk-language-constants-lower (mapcar 'upcase splunk-language-constants-lower)))
+     (append splunk-language-constants-lower (mapcar 'upcase splunk-language-constants-lower))))
 
-  ;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
-  (defconst splunk-macro-names-regexp
-     (rx "`" (group (one-or-more word)) (or "(" "`")))
+;; A Splunk word can contain underscores.  To use in the place of `word'
+;;
+;; Reference on extending rx:
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Extending-Rx.html
+;;   - https://emacs.stackexchange.com/q/79050
+(rx-define splunk-word
+   (or word "_"))
 
-  ;; "\\b(\\d+)\\b"
-  (defconst splunk-digits-regexp
-     (rx word-boundary (group (one-or-more digit)) word-boundary))
+;; "(?<=\\`)[\\w]+(?=\\(|\\`)"
+(defconst splunk-macro-names-regexp
+   (rx "`" (group (one-or-more splunk-word)) (or "(" "`")))
 
-  ;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
-  (defconst splunk-escape-chars-regexp
-     (rx (group (or "\\\\" "\\*" "\\|" "\\=" "(" ")" "[" "]"))))
+;; "\\b(\\d+)\\b"
+(defconst splunk-digits-regexp
+   (rx word-boundary (group (one-or-more digit)) word-boundary))
 
-  ;; "(\\|,)"
-  (defconst splunk-operators-regexp
-     ;; (rx (group (or "\\" ","))))
-     (rx unmatchable))
+;; "(\\\\\\\\|\\\\\\||\\\\\\*|\\\\\\=)"
+(defconst splunk-escape-chars-regexp
+   (rx (group (or "\\\\" "\\*" "\\|" "\\=" "(" ")" "[" "]"))))
 
-  ;; E.g., sourcetype=access_*
-  (defconst splunk-keyword-regexp
-     (rx (and (group (one-or-more word))
-              (optional (one-or-more space))  "=" (optional (one-or-more space))
-              (or (one-or-more digit)
-                  (and (optional "\"") (one-or-more (or "*" word)) (optional "\""))))))
+;; "(\\|,)"
+(defconst splunk-operators-regexp
+   ;; (rx (group (or "\\" ","))))
+   (rx unmatchable))
 
-  ;; Alternative comment syntax; ref:
-  ;;   - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
-  ;;   - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
-  ;;   - https://docs.splunk.com/Documentation/Splunk/8.0.10/Search/Addcommentstosearches
-  (defconst splunk-special-comment-regexp
-     (rx (or
-          ;; Triple backtick style
-	      (and (repeat 3 "`") (zero-or-more anything) (repeat 3 "`"))
-          ;; Comment macro
-          (and "`comment(\"" (zero-or-more anything) "\")`")))))
+;; E.g., sourcetype=access_*
+(defconst splunk-keyword-regexp
+   (rx (and (group (one-or-more splunk-word))
+            (optional (one-or-more space))  "=" (optional (one-or-more space))
+            (or (one-or-more digit)
+                (and (optional "\"") (one-or-more (or "*" splunk-word)) (optional "\""))))))
 
-;; Builtin font style ref:
-;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
+;; Alternative comment syntax; ref:
+;;   - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
+;;   - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
+;;   - https://docs.splunk.com/Documentation/Splunk/8.0.10/Search/Addcommentstosearches
+(defconst splunk-special-comment-regexp
+   (rx (or
+           ;; Triple backtick style
+           (and (repeat 3 "`") (zero-or-more anything) (repeat 3 "`"))
+           ;; Comment macro
+           (and "`comment(\"" (zero-or-more anything) "\")`"))));;
+  ;; )
+
+;; Relevant refs
+;;   - Font faces: https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
+;;   - Regex: https://www.gnu.org/software/emacs/manual/html_node/elisp/Rx-Constructs.html
 ;;
 ;; Note the double apostrophe before providing custom type faces:
 ;;   - https://emacs.stackexchange.com/a/3587
@@ -316,5 +326,3 @@
 (provide 'splunk-mode)
 
 ;;; splunk-mode.el ends here
-
-
