@@ -164,7 +164,7 @@
   "Face for transforming functions such as `count' and `values' in Splunk."
   :group 'splunk-mode)
 
-(defface splunk-constants-face
+(defface splunk-language-constants-face
   '((t :inherit font-lock-constant-face))
   ;; '((t :inherit font-lock-type-face))
   ;; '((t :inherit font-lock-function-name-face))
