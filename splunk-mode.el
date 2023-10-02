@@ -55,13 +55,8 @@
 ;;         - Macro parameters
 ;;         - Variables
 ;;         - Comparison or assignment
-;;         - Double-quoted
-;;         - Single-quoted
+;;         - Do we need single quotes?
 ;;         - Embedded block
-;;         - Block comment/other comment style (`comment()` macro)/```
-;;             - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
-;;             - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
-;;             - https://docs.splunk.com/Documentation/Splunk/8.0.10/Search/Addcommentstosearches
 ;; TODO: Allow snake_case keyword arguments
 ;; TODO: Handle parentheses outside of escape characters?
 ;; TODO: Different colour for parentheses (too similar to builtin)
@@ -112,6 +107,11 @@
   :prefix "splunk-")
 
 ;;; Faces
+
+(defface splunk-comment-face
+  '((t :inherit font-lock-comment-face))
+  "Face for alternative comment syntax in Splunk."
+  :group 'splunk-mode)
 
 (defface splunk-builtin-functions-face
   '((t :inherit font-lock-builtin-face))
@@ -256,15 +256,44 @@
      (rx (and (group (one-or-more word))
               (optional (one-or-more space))  "=" (optional (one-or-more space))
               (or (one-or-more digit)
-                  (and (optional "\"") (one-or-more (or "*" word)) (optional "\"")))))))
+                  (and (optional "\"") (one-or-more (or "*" word)) (optional "\""))))))
 
-;; https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
+  ;; Alternative comment syntax; ref:
+  ;;   - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
+  ;;   - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
+  ;;   - https://docs.splunk.com/Documentation/Splunk/8.0.10/Search/Addcommentstosearches
+  (defconst splunk-special-comment-regexp
+     (rx (or
+          ;; Triple backtick style
+	      (and (repeat 3 "`") (zero-or-more anything) (repeat 3 "`"))
+          ;; Comment macro
+          (and "`comment(\"" (zero-or-more anything) "\")`")))))
+
+;; Builtin font style ref:
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
+;;
+;; Note the double apostrophe before providing custom type faces:
+;;   - https://emacs.stackexchange.com/a/3587
 (defconst splunk-font-lock-keywords
   (list
+   ;; Syntax defined by keyword lists
    (cons (regexp-opt splunk-builtin-functions 'symbols) ''splunk-builtin-functions-face)
    (cons (regexp-opt splunk-eval-functions 'symbols) ''splunk-eval-functions-face)
    (cons (regexp-opt splunk-transforming-functions 'symbols) ''splunk-transforming-functions-face)
    (cons (regexp-opt splunk-language-constants 'symbols) ''splunk-language-constants-face)
+
+   ;; Alternative comment styles
+   ;;
+   ;; Note the syntax-level override:
+   ;;   - https://emacs.stackexchange.com/a/79049
+   ;;   - https://stackoverflow.com/a/24107675
+   ;;   - https://emacs.stackexchange.com/a/61891
+   (list splunk-special-comment-regexp 0 ''splunk-comment-face t)
+
+   ;; Syntax defined by regex
+   ;;
+   ;; Note the extraction of specific groups from the regex:
+   ;;   - https://emacs.stackexchange.com/a/79044
    (list splunk-macro-names-regexp 1 ''splunk-macros-face)
    (cons splunk-digits-regexp ''splunk-digits-face)
    (cons splunk-escape-chars-regexp ''splunk-escape-chars-face)
@@ -287,3 +316,5 @@
 (provide 'splunk-mode)
 
 ;;; splunk-mode.el ends here
+
+
