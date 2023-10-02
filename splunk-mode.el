@@ -44,9 +44,11 @@
 ;;   - https://github.com/splunk/vscode-extension-splunk/
 ;; 
 ;; The following resources are from
-;; https://docs.splunk.com/Documentation/Splunk/9.0.1/:
+;; https://docs.splunk.com/Documentation/Splunk/9.1.1/: (or latest)
 ;;   - SPL: Search/Aboutthesearchlanguage
 ;;   - SPL Syntax: SearchReference/UnderstandingSPLsyntax
+;;
+;; Specific resources are referenced where relevant within the code.
 
 ;; TODO: Add highlighting of other keywords
 ;;         - Operators?
@@ -56,7 +58,10 @@
 ;;         - Double-quoted
 ;;         - Single-quoted
 ;;         - Embedded block
-;;         - Block comment/other comment style (`comment()` macro)
+;;         - Block comment/other comment style (`comment()` macro)/```
+;;             - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
+;;             - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
+;;             - https://docs.splunk.com/Documentation/Splunk/8.0.10/Search/Addcommentstosearches
 ;; TODO: Allow snake_case keyword arguments
 ;; TODO: Handle parentheses outside of escape characters?
 ;; TODO: Different colour for parentheses (too similar to builtin)
@@ -67,6 +72,29 @@
 ;; TODO: Autocomplete
 ;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
 ;;       within subsearches
+;; ======================================
+;; TODO: (defalias 'jai-parent-mode
+;;          (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
+;; TODO: -beginning-of-defun, -end-of-defun, -indent-line ((setq-local indent-line-function 'simpc-indent-line))
+;; TODO: ;; add setq-local for older emacs versions
+;;   (unless (fboundp 'setq-local)
+;;       (defmacro setq-local (var val)
+;;           `(set (make-local-variable ',var) ,val)))
+;; TODO: Splunk > splunk
+;; TODO: indent on parentheses
+;;   NOTE: taken from the scala-indent package and modified for Jai.
+;;     Still uses the js-indent-line as a base, which will have to be
+;;     replaced when the language is more mature.
+;;     (defun jai--indent-on-parentheses ()
+;;       (when (and (= (char-syntax (char-before)) ?\))
+;;                  (= (save-excursion (back-to-indentation) (point)) (1- (point))))
+;;                   (js-indent-line)))
+;;     (defun jai--add-self-insert-hooks ()
+;;       (add-hook 'post-self-insert-hook
+;;         'jai--indent-on-parentheses))
+;;     (jai--add-self-insert-hooks)  ;; in mode definition
+;; TODO: (font-lock-fontify-buffer)
+;; TODO: automatic new line when |?
 
 ;;; Code:
 
