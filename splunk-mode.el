@@ -67,6 +67,9 @@
 ;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
 ;;       within subsearches
 ;; TODO: Different brackets colours when nested
+;; TODO: Fix bug where comment greys-out next lines when splunk-mode turned on:
+;;         `comment("This is a comment")`  // or ```This is a comment```
+;;         ] | inputlookup hello.csv
 ;; ======================================
 ;; TODO: (defalias 'jai-parent-mode
 ;;          (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
