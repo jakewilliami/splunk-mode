@@ -67,9 +67,6 @@
 ;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
 ;;       within subsearches
 ;; TODO: Different brackets colours when nested
-;; TODO: Fix bug where comment greys-out next lines when splunk-mode turned on:
-;;         `comment("This is a comment")`  // or ```This is a comment```
-;;         ] | inputlookup hello.csv
 ;; TODO: automatic new line when |?
 ;; TODO: Review compatibility with versions ≥ 23
 ;; ======================================
@@ -307,17 +304,16 @@
             (or (one-or-more digit)
                 (and (optional "\"") (one-or-more (or "*" splunk-word)) (optional "\""))))))
 
-;; Alternative comment syntax; ref:
+;; Alternative comment syntax; refs:
 ;;   - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
 ;;   - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
 ;;   - https://docs.splunk.com/Documentation/Splunk/8.0.10/Search/Addcommentstosearches
-(defconst splunk-special-comment-regexp
+(defconst splunk-alt-comment-regexp
    (rx (or
-           ;; Triple backtick style
-           (and (repeat 3 "`") (zero-or-more anything) (repeat 3 "`"))
-           ;; Comment macro
-           (and "`comment(\"" (zero-or-more anything) "\")`"))));;
-  ;; )
+        ;; Triple backtick style
+        (and (repeat 3 "`") (zero-or-more not-newline) (repeat 3 "`"))
+        ;; Comment macro
+        (and "`comment(\"" (zero-or-more not-newline) "\")`"))))
 
 ;; Relevant refs
 ;;   - Font faces: https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
@@ -339,7 +335,7 @@
    ;;   - https://emacs.stackexchange.com/a/79049
    ;;   - https://stackoverflow.com/a/24107675
    ;;   - https://emacs.stackexchange.com/a/61891
-   (list splunk-special-comment-regexp 0 ''splunk-comment-face t)
+   (list splunk-alt-comment-regexp 0 ''splunk-comment-face t)
 
    ;; Syntax defined by regex
    ;;
