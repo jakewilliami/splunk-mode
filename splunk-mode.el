@@ -53,7 +53,6 @@
 ;;; Notes:
 ;;
 ;; TODO: Review compatibility with versions ≥ 23.  Note: rx-define added in 27.1.
-;; TODO: Ensure `|' separates symbols (b590d3c0)
 ;; NOTE: Feature possibilities:
 ;;   - Operator highlighting
 ;;   - Comparison or assignment highlighting
@@ -179,6 +178,11 @@
 
 ;;; Syntax
 
+;; Update syntax table; refs:
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Table-Functions.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Flags.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Descriptors.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Syntax-Class-Table.html
 (defconst splunk-mode-syntax-table
   (with-syntax-table (copy-syntax-table)
     ;; C/C++ style comments
@@ -186,8 +190,14 @@
 	(modify-syntax-entry ?* ". 23")
 	(modify-syntax-entry ?\n "> b")
 
+    ;; The pipe character needs to be counted as a symbol-constituent
+    ;; character, so that symbols are broken up by pipes; refs:
+    (modify-syntax-entry ?| " ")
+
     ;; Chars are the same as strings
     (modify-syntax-entry ?' "\"")
+
+    ;; Syntax table
     (syntax-table))
   "Syntax table for `splunk-mode'.")
 
