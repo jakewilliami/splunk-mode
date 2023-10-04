@@ -78,7 +78,6 @@
 ;;   (unless (fboundp 'setq-local)
 ;;       (defmacro setq-local (var val)
 ;;           `(set (make-local-variable ',var) ,val)))
-;; TODO: Splunk > splunk
 ;; TODO: indent on parentheses
 ;;   NOTE: taken from the scala-indent package and modified for Jai.
 ;;     Still uses the js-indent-line as a base, which will have to be
@@ -356,7 +355,7 @@
 ;;; Mode
 
 ;;;###autoload
-(define-derived-mode splunk-mode prog-mode "splunk"
+(define-derived-mode splunk-mode prog-mode "Splunk"
   "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
