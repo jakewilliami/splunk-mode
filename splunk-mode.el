@@ -70,9 +70,9 @@
 ;; TODO: Fix bug where comment greys-out next lines when splunk-mode turned on:
 ;;         `comment("This is a comment")`  // or ```This is a comment```
 ;;         ] | inputlookup hello.csv
+;; TODO: automatic new line when |?
+;; TODO: Review compatibility with versions ≥ 23
 ;; ======================================
-;; TODO: (defalias 'jai-parent-mode
-;;          (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
 ;; TODO: -beginning-of-defun, -end-of-defun, -indent-line ((setq-local indent-line-function 'simpc-indent-line))
 ;; TODO: ;; add setq-local for older emacs versions
 ;;   (unless (fboundp 'setq-local)
@@ -90,7 +90,6 @@
 ;;       (add-hook 'post-self-insert-hook
 ;;         'jai--indent-on-parentheses))
 ;;     (jai--add-self-insert-hooks)  ;; in mode definition
-;; TODO: automatic new line when |?
 
 ;;; Code:
 
@@ -354,8 +353,16 @@
 
 ;;; Mode
 
+;; Inspired by Alexey's Jai mode, for compatibility with Emacs < 24:
+;;   - https://github.com/rexim/dotfiles/blob/25f8ddc6/.emacs.local/jai-mode.el#L157-L158
+;;   - https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/blob/7b8520b2/groovy-mode.el#L176-L178
+;;   - https://emacs.stackexchange.com/a/955
+;; TODO: Consider requiring Emacs ≥ 24
+(defalias 'splunk-parent-mode
+  (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
+
 ;;;###autoload
-(define-derived-mode splunk-mode prog-mode "Splunk"
+(define-derived-mode splunk-mode splunk-parent-mode "Splunk"
   "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
