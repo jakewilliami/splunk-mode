@@ -53,6 +53,7 @@
 ;;; Notes:
 ;;
 ;; TODO: Review compatibility with versions ≥ 23.  Note: rx-define added in 27.1.
+;; TODO: Ensure `|' separates symbols (b590d3c0)
 ;; NOTE: Feature possibilities:
 ;;   - Operator highlighting
 ;;   - Comparison or assignment highlighting
