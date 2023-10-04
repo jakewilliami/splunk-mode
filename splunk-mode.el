@@ -71,10 +71,6 @@
 ;; TODO: Review compatibility with versions ≥ 23
 ;; ======================================
 ;; TODO: -beginning-of-defun, -end-of-defun, -indent-line ((setq-local indent-line-function 'simpc-indent-line))
-;; TODO: ;; add setq-local for older emacs versions
-;;   (unless (fboundp 'setq-local)
-;;       (defmacro setq-local (var val)
-;;           `(set (make-local-variable ',var) ,val)))
 ;; TODO: indent on parentheses
 ;;   NOTE: taken from the scala-indent package and modified for Jai.
 ;;     Still uses the js-indent-line as a base, which will have to be
@@ -356,6 +352,11 @@
 ;; TODO: Consider requiring Emacs ≥ 24
 (defalias 'splunk-parent-mode
   (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
+
+;; Add `setq-local' for Emacs < 24 (also stolen from Jai mode)
+(unless (fboundp 'setq-local)
+  (defmacro setq-local (var val)
+    `(set (make-local-variable ',var) ,val)))
 
 ;;;###autoload
 (define-derived-mode splunk-mode splunk-parent-mode "Splunk"
