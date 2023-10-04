@@ -91,7 +91,6 @@
 ;;       (add-hook 'post-self-insert-hook
 ;;         'jai--indent-on-parentheses))
 ;;     (jai--add-self-insert-hooks)  ;; in mode definition
-;; TODO: (font-lock-fontify-buffer)
 ;; TODO: automatic new line when |?
 
 ;;; Code:
@@ -361,7 +360,8 @@
   "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
-  (setq-local comment-start "//"))
+  (setq-local comment-start "//")
+  (font-lock-fontify-buffer))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.spl\\'" . splunk-mode))
