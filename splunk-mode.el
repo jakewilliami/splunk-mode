@@ -50,43 +50,23 @@
 ;;
 ;; Specific resources are referenced where relevant within the code.
 
-;; TODO: Add highlighting of other keywords
-;;         - Operators?
-;;         - Macro parameters
-;;         - Variables
-;;         - Comparison or assignment
-;;         - Do we need single quotes?
-;;         - Embedded block
-;; TODO: Handle parentheses outside of escape characters?
-;; TODO: Different colour for parentheses (too similar to builtin)
-;; TODO: Make keyword highlighting more similar to official splunk
-;;       highlighting (i.e., most things are function highlihgts)
-;; TODO: Linting/indentation suggestion (similar behaviour to 
-;;       julia-mode)
-;; TODO: Autocomplete
-;; TODO: jump to the opposite side of the blocks with C-M-f and C-M-b
-;;       within subsearches
-;; TODO: Different brackets colours when nested
-;; TODO: automatic new line when |?
-;; TODO: Review compatibility with versions ≥ 23
-;; ======================================
-;; TODO: -beginning-of-defun, -end-of-defun, -indent-line ((setq-local indent-line-function 'simpc-indent-line))
-;; TODO: indent on parentheses
-;;   NOTE: taken from the scala-indent package and modified for Jai.
-;;     Still uses the js-indent-line as a base, which will have to be
-;;     replaced when the language is more mature.
-;;     (defun jai--indent-on-parentheses ()
-;;       (when (and (= (char-syntax (char-before)) ?\))
-;;                  (= (save-excursion (back-to-indentation) (point)) (1- (point))))
-;;                   (js-indent-line)))
-;;     (defun jai--add-self-insert-hooks ()
-;;       (add-hook 'post-self-insert-hook
-;;         'jai--indent-on-parentheses))
-;;     (jai--add-self-insert-hooks)  ;; in mode definition
+;;; Notes:
+;;
+;; TODO: Review compatibility with versions ≥ 23.  Note: rx-define added in 27.1.
+;; NOTE: Feature possibilities:
+;;   - Operator highlighting
+;;   - Comparison or assignment highlighting
+;;   - Different brackets colours when nested
+;;   - Make keyword highlighting more similar to official Splunk
+;;     highlighting (i.e., most things are function highlights.)
+;;   - Automatic new line when `|' typed
+;;   - Jump to the opposite side of the blocks with C-M-f and C-M-b
+;;     within subsearches
+;;   - Linting/indentation suggestion (e.g., auto indent on brackets.)
+;;   - Autocomplete
 
 ;;; Code:
 
-;; Need the following to allow GNU Emacs 19 to compile the file.
 (eval-when-compile
   (require 'rx)
   (require 'regexp-opt))
@@ -273,6 +253,7 @@
 ;; Reference on extending rx:
 ;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Extending-Rx.html
 ;;   - https://emacs.stackexchange.com/q/79050
+;;   - https://emacsdocs.org/docs/elisp/Rx-Notation#macro-rx-define-name-arglist-rx-form
 (rx-define splunk-word
    (or word "_"))
 
