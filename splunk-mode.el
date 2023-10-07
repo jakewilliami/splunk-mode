@@ -6,7 +6,7 @@
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
 ;; URL: https://github.com/jakewilliami/splunk-mode/
 ;; Keywords: languages
-;; Package-Requires: ((emacs "23"))
+;; Package-Requires: ((emacs "27"))
 
 ;;; Usage:
 ;;
@@ -52,7 +52,6 @@
 
 ;;; Notes:
 ;;
-;; TODO: Review compatibility with versions ≥ 23.  Note: rx-define added in 27.1.
 ;; NOTE: Feature possibilities:
 ;;   - Operator highlighting
 ;;   - Comparison or assignment highlighting
@@ -337,21 +336,8 @@
 
 ;;; Mode
 
-;; Inspired by Alexey's Jai mode, for compatibility with Emacs < 24:
-;;   - https://github.com/rexim/dotfiles/blob/25f8ddc6/.emacs.local/jai-mode.el#L157-L158
-;;   - https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/blob/7b8520b2/groovy-mode.el#L176-L178
-;;   - https://emacs.stackexchange.com/a/955
-;; TODO: Consider requiring Emacs ≥ 24
-(defalias 'splunk-parent-mode
-  (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
-
-;; Add `setq-local' for Emacs < 24 (also stolen from Jai mode)
-(unless (fboundp 'setq-local)
-  (defmacro setq-local (var val)
-    `(set (make-local-variable ',var) ,val)))
-
 ;;;###autoload
-(define-derived-mode splunk-mode splunk-parent-mode "Splunk"
+(define-derived-mode splunk-mode prog-mode "Splunk"
   "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
