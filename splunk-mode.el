@@ -40,6 +40,9 @@
 ;;
 ;; Major Mode for editing Splunk Search Processing Language (SPL) source code.
 ;;
+;; This package provides syntax highlighting and indentation support for
+;; SPL source code.
+;;
 ;; Syntax resources:
 ;;   - https://github.com/splunk/vscode-extension-splunk/
 ;; 
@@ -59,12 +62,11 @@
 ;;   - Make keyword highlighting more similar to official Splunk
 ;;     highlighting (i.e., most things are function highlights.)
 ;;   - Automatic new line when `|' typed
-;;   - Jump to the opposite side of the blocks with C-M-f and C-M-b
-;;     within subsearches
-;;   - Linting/indentation suggestion (e.g., auto indent on brackets.)
+;;   - Automatic new line and indent when `\[' typed
+;;   - Linting
 ;;   - Autocomplete
 
-;;; Code:
+;;; Code
 
 (eval-when-compile
   (require 'rx)
@@ -336,12 +338,91 @@
 
 ;;; Mode
 
+;; Handle indentation for SPL code.
+;;
+;; Inspired by similar functions from groovy-mode.el:
+;;   - https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/blob/7b8520b2/groovy-mode.el#L751-L770
+;;   - https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/blob/7b8520b2/groovy-mode.el#L837-L986
+;;
+;; Refs:
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Position-Parse.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Parser-State.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/eintr/nth.html
+
+(defcustom splunk-indent-offset 4
+  "Indentation amount for Splunk."
+  :type 'natnum
+  :safe #'natnum
+  :group 'splunk-mode)
+
+;; Always indent with spaces
+(setq-local indent-tabs-mode nil)
+
+
+;; NOTE: I don't know how this function works.  I had to reverse the logic for it
+;;  to work as expected, but I would have thought it should work without the `not'
+(defun splunk--is-square-bracket-p (pos)
+  "Check if the parenthesis at `pos' is a square bracket."
+  (let ((parse-state (parse-partial-sexp (point-min) pos)))
+    (not (= (char-after (nth 8 parse-state)) ?\[))))
+
+(defun splunk--effective-depth (pos)
+  "Get effective depth at `pos' in SPL query."
+  (let ((paren-depth 0)
+        (syntax (syntax-ppss pos))
+        (current-line (line-number-at-pos pos)))
+    (save-excursion
+      ;; Keep going whilst we're inside parentheses
+      (while (> (nth 0 syntax) 0)
+        ;; Go to the most recent enclosing open parenthesis
+        (goto-char (nth 1 syntax))
+
+        ;; Count this paren, but only if it was on another line
+	    ;; TODO: doc: or if it was open square
+        (let ((new-line (line-number-at-pos (point))))
+          (unless (or (= new-line current-line)
+                      (splunk--is-square-bracket-p (point)))
+            (setq paren-depth (1+ paren-depth))
+            (setq current-line new-line)))
+
+        (setq syntax (syntax-ppss (point)))))
+    paren-depth))
+
+(defun splunk--current-line ()
+  "The current line enclosing point."
+  (buffer-substring-no-properties
+   (line-beginning-position) (line-end-position)))
+
+(defun splunk-indent-line ()
+  "Indent the current line according to the number of parentheses."
+  (interactive)
+  ;; TODO: consider indenting line if it is not the first line in the search.
+  ;;  However, this is a personal stylistic preference rather than standard
+  (let* ((current-depth (splunk--effective-depth (line-beginning-position)))
+         (current-line (s-trim (splunk--current-line)))
+  )
+
+  ;; If this line starts with a closing paren, unindent by one level
+  (when (s-starts-with-p "]" current-line)
+    (setq current-depth (1- current-depth)))
+
+  ;; `current-depth' should never be negative, unless the source
+  ;; has unbalanced brackets.  Ensure we handle this robustly
+  (when (< current-depth 0)
+    (setq current-depth 0))
+
+  ;; Indent region!
+  (let ((indent-level current-depth))
+    (indent-line-to (* splunk-indent-offset indent-level)))
+))
+
 ;;;###autoload
 (define-derived-mode splunk-mode prog-mode "Splunk"
   "Major Mode for editing Splunk SPL source code."
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
   (setq-local comment-start "//")
+  (setq-local indent-line-function 'splunk-indent-line)
   (font-lock-fontify-buffer))
 
 ;;;###autoload
@@ -351,3 +432,4 @@
 (provide 'splunk-mode)
 
 ;;; splunk-mode.el ends here
+
