@@ -66,6 +66,8 @@
 ;;   - Linting
 ;;   - Autocomplete
 
+
+
 ;;; Code
 
 (eval-when-compile
@@ -80,6 +82,8 @@
   :version "0.1"
   :group 'languages
   :prefix "splunk-")
+
+
 
 ;;; Faces
 ;;
@@ -176,6 +180,8 @@
        :weight bold))
   "Face for operators in Splunk."
   :group 'splunk-mode)
+
+
 
 ;;; Syntax
 
@@ -304,6 +310,8 @@
         ;; Comment macro
         (and "`comment(\"" (zero-or-more not-newline) "\")`"))))
 
+
+
 ;; Relevant refs
 ;;   - Font faces: https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 ;;   - Regex: https://www.gnu.org/software/emacs/manual/html_node/elisp/Rx-Constructs.html
@@ -335,6 +343,8 @@
    (cons splunk-escape-chars-regexp ''splunk-escape-chars-face)
    (cons splunk-operators-regexp ''splunk-operators-face)
    (list splunk-keyword-regexp 1 ''splunk-keyword-face)))
+
+
 
 ;;; Mode
 
