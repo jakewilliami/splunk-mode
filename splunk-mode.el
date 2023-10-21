@@ -2,10 +2,10 @@
 
 ;; Copyright (C) 2022–2023 Jake Ireland
 
-;; Version: 1.0
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
 ;; URL: https://github.com/jakewilliami/splunk-mode/
-;; Keywords: languages
+;; Version: 1.0
+;; Keywords: languages splunk mode
 ;; Package-Requires: ((emacs "27"))
 
 ;;; Usage:
@@ -15,6 +15,8 @@
 ;; (require 'splunk-mode)
 
 ;;; Licence:
+;;
+;; This file is not part of GNU Emacs.
 ;;
 ;; Permission is hereby granted, free of charge, to any person
 ;; obtaining a copy of this software and associated documentation
@@ -55,20 +57,24 @@
 
 ;;; Notes:
 ;;
+;; TODO:
+;;   - if
+;;   - mvindex
+;;
 ;; NOTE: Feature possibilities:
 ;;   - Operator highlighting
 ;;   - Comparison or assignment highlighting
 ;;   - Different brackets colours when nested
 ;;   - Make keyword highlighting more similar to official Splunk
 ;;     highlighting (i.e., most things are function highlights.)
-;;   - Automatic new line when `|' typed
-;;   - Automatic new line and indent when `\[' typed
 ;;   - Linting
 ;;   - Autocomplete
 
+;;; Code
+
 
 
-;;; Code
+;;; Main
 
 (eval-when-compile
   (require 'rx)
@@ -310,8 +316,6 @@
         ;; Comment macro
         (and "`comment(\"" (zero-or-more not-newline) "\")`"))))
 
-
-
 ;; Relevant refs
 ;;   - Font faces: https://www.gnu.org/software/emacs/manual/html_node/elisp/Faces-for-Font-Lock.html
 ;;   - Regex: https://www.gnu.org/software/emacs/manual/html_node/elisp/Rx-Constructs.html
@@ -346,7 +350,7 @@
 
 
 
-;;; Mode
+;;; Indentation and Electricity
 
 ;; Handle indentation for SPL code.
 ;;
@@ -426,14 +430,138 @@
     (indent-line-to (* splunk-indent-offset indent-level)))
 ))
 
+;; Handle automatic new lines TODO OOOO)))OOOOOOOOOOOOO doc
+
+
+;; https://www.emacswiki.org/emacs/Electricity
+
+(defvar electric-pair-inhibit-predicate)
+(defvar electric-pair-skip-self) ;; TODO
+(defvar electric-indent-chars)
+
+;; (defun splunk--insert-newline-after-open-bracket ()
+  ;; ""
+  ;; (interactive)
+  ;; (insert "[")
+  ;; (if (eq (char-before) ?\[)
+      ;; (progn (newline) (indent-according-to-mode))))
+
+
+
+(defun splunk--insert-pipe ()
+  "Insert a new line and auto-indent after a `|' character."
+  (interactive)
+  (insert "|")
+  (newline))
+
+(defun splunk--insert-open-bracket ()
+  "Insert a new line and auto-indent after a `\[' character."
+  (interactive)
+  (insert "[")
+  (newline-and-indent))
+
+;; (defun splunk--electric-indent ()
+  ;; "Custom Electric Indent rules for Splunk mode."
+  ;; (setq-local electric-indent-chars (append electric-indent-chars '(?| ?\[))))
+
+;; (defun splunk--electric-indent ()
+  ;; "Custom electric indent function for Splunk mode."
+  ;; (interactive)
+  ;; (let ((char (char-before)))
+    ;; (if (or (eq char ?|) (eq char ?[))
+        ;; (progn
+          ;; (newline)
+          ;; (indent-according-to-mode))
+      ;; (self-insert-command 1))))
+
+;; (add-hook 'splunk-mode-hook 'electric-indent-mode-hook)
+;; (add-hook 'splunk-mode-hook 'splunk--electric-indent)
+
+;; (defvar splunk-mode-map
+  ;; (let ((m (make-sparse-keymap)))
+    ;; (unless (boundp 'electric-indent-chars)
+      ;; (define-key m "[" #'splunk--insert-open-bracket)
+      ;; (define-key m "|" #'splunk--insert-pipe))
+    ;; m)
+  ;; "Keymap used by ‘splunk-mode’.")
+
+(defun splunk--indent-post-self-insert-function ()
+  ""
+  (when (and electric-indent-mode
+             (eq (char-before) last-command-event))
+    (cond
+     ;; Electric indent inside parens
+     
+    )
+  ))
+
+
+
+;; (defconst splunk-electric-layout-rules
+  ;; (list
+    ;; (cons ?\[ . before)
+  ;; ))
+
+
+
+
+;;; Mode
+
 ;;;###autoload
 (define-derived-mode splunk-mode prog-mode "Splunk"
-  "Major Mode for editing Splunk SPL source code."
+  "Major Mode for editing Splunk SPL source code.
+
+\\{splunk-mode-map}"
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
-  (setq-local comment-start "//")
+  ;; (setq-local comment-start "//")
   (setq-local indent-line-function 'splunk-indent-line)
+  ;; (electric-indent-local-mode 1)
+    ;; (electric-indent-mode 1)
+  ;; set electric characters
+  ;; (setq-local electric-indent-chars
+  ;; (append "|[]" electric-indent-chars))
+  ;; (setq-local electric-indent-chars (append electric-indent-chars '(?| ?\[))) ;; THIS ONE
+  ;; Auto indent on |
+  ;; (setq-local electric-indent-chars
+              ;; (cons ?| (and (boundp 'electric-indent-chars)
+                            ;; electric-indent-chars)))
+
+
+  
+  ;; (add-hook 'post-self-insert-hook
+            ;; #'splunk--indent-post-self-insert-function 'append 'local)
+
+  ;; (when (boundp 'electric-indent-chars)
+    ;; (set (make-local-variable 'electric-indent-chars) '(?| ?\[))
+    ;; (add-hook 'electric-indent-functions #'splunk--electric-indent-function nil t)
+  ;; )
+  
+  ;; (electric-indent-mode 1)
+  ;; Closing square bracket should re-indent (i.e. unindent) the line
+  ;; FOR electric-indent-mode THIS ONE
+  ;; (when (boundp 'electric-indent-chars)
+    ;; (setq-local electric-indent-chars
+                ;; (append electric-indent-chars '(?|))))
+
+  ;; FOR electric-layout-mode
+  ;; (setq-local electric-layout-rules splunk-electric-layout-rules)
+  ;; requires electric-layout-mode
+  (setq electric-layout-rules '((?\[ . before) (?| . before)))
+  ;; (add-to-list 'electric-layout-rules
+               ;; '((?\[ . before)
+                 ;; (?| . before)))
+
+  (add-to-list 'electric-layout-rules '(?| . before))
+  ;; requires electric-indent-mode
+  (setq-local electric-indent-chars
+              (cons ?\] (and (boundp 'electric-indent-chars)
+                             electric-indent-chars)))
+
   (font-lock-fontify-buffer))
+
+;; (add-hook 'lisp-mode-hook #'(lambda ()
+;; (local-set-key (kbd "RET") 'newline-and-indent)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.spl\\'" . splunk-mode))
@@ -441,5 +569,25 @@
 
 (provide 'splunk-mode)
 
+
+
+;; Local Variables:
+;; coding: utf-8
+;; checkdoc-major-mode: t
+;; End:
+
 ;;; splunk-mode.el ends here
 
+
+
+
+;; (setq electric-layout-rules )
+
+
+
+
+
+
+;; electric-indent-just-newline
+;; electric-layout-rules
+;; electric-pair-mode
