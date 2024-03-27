@@ -365,6 +365,161 @@
 
 
 
+;;; Indentation and Electricity
+
+;; Handle indentation for SPL code.
+;;
+;; Inspired by similar functions from groovy-mode.el:
+;;   - https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/blob/7b8520b2/groovy-mode.el#L751-L770
+;;   - https://github.com/Groovy-Emacs-Modes/groovy-emacs-modes/blob/7b8520b2/groovy-mode.el#L837-L986
+;;
+;; Refs:
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Position-Parse.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/elisp/Parser-State.html
+;;   - https://www.gnu.org/software/emacs/manual/html_node/eintr/nth.html
+
+(defcustom splunk-indent-offset 4
+  "Indentation amount for Splunk."
+  :type 'natnum
+  :safe #'natnum
+  :group 'splunk-mode)
+
+;; Always indent with spaces
+(setq-local indent-tabs-mode nil)
+
+
+;; NOTE: I don't know how this function works.  I had to reverse the logic for it
+;;  to work as expected, but I would have thought it should work without the `not'
+(defun splunk--is-square-bracket-p (pos)
+  "Check if the parenthesis at `pos' is a square bracket."
+  (let ((parse-state (parse-partial-sexp (point-min) pos)))
+    (not (= (char-after (nth 8 parse-state)) ?\[))))
+
+(defun splunk--effective-depth (pos)
+  "Get effective depth at `pos' in SPL query."
+  (let ((paren-depth 0)
+        (syntax (syntax-ppss pos))
+        (current-line (line-number-at-pos pos)))
+    (save-excursion
+      ;; Keep going whilst we're inside parentheses
+      (while (> (nth 0 syntax) 0)
+        ;; Go to the most recent enclosing open parenthesis
+        (goto-char (nth 1 syntax))
+
+        ;; Count this paren, but only if it was on another line
+	    ;; TODO: doc: or if it was open square
+        (let ((new-line (line-number-at-pos (point))))
+          (unless (or (= new-line current-line)
+                      (splunk--is-square-bracket-p (point)))
+            (setq paren-depth (1+ paren-depth))
+            (setq current-line new-line)))
+
+        (setq syntax (syntax-ppss (point)))))
+    paren-depth))
+
+(defun splunk--current-line ()
+  "The current line enclosing point."
+  (buffer-substring-no-properties
+   (line-beginning-position) (line-end-position)))
+
+(defun splunk-indent-line ()
+  "Indent the current line according to the number of parentheses."
+  (interactive)
+  ;; TODO: consider indenting line if it is not the first line in the search.
+  ;;  However, this is a personal stylistic preference rather than standard
+  (let* ((current-depth (splunk--effective-depth (line-beginning-position)))
+         (current-line (s-trim (splunk--current-line)))
+  )
+
+  ;; If this line starts with a closing paren, unindent by one level
+  (when (s-starts-with-p "]" current-line)
+    (setq current-depth (1- current-depth)))
+
+  ;; `current-depth' should never be negative, unless the source
+  ;; has unbalanced brackets.  Ensure we handle this robustly
+  (when (< current-depth 0)
+    (setq current-depth 0))
+
+  ;; Indent region!
+  (let ((indent-level current-depth))
+    (indent-line-to (* splunk-indent-offset indent-level)))
+))
+
+;; Handle automatic new lines TODO OOOO)))OOOOOOOOOOOOO doc
+
+
+;; https://www.emacswiki.org/emacs/Electricity
+
+(defvar electric-pair-inhibit-predicate)
+(defvar electric-pair-skip-self) ;; TODO
+(defvar electric-indent-chars)
+
+;; (defun splunk--insert-newline-after-open-bracket ()
+  ;; ""
+  ;; (interactive)
+  ;; (insert "[")
+  ;; (if (eq (char-before) ?\[)
+      ;; (progn (newline) (indent-according-to-mode))))
+
+
+
+(defun splunk--insert-pipe ()
+  "Insert a new line and auto-indent after a `|' character."
+  (interactive)
+  (insert "|")
+  (newline))
+
+(defun splunk--insert-open-bracket ()
+  "Insert a new line and auto-indent after a `\[' character."
+  (interactive)
+  (insert "[")
+  (newline-and-indent))
+
+;; (defun splunk--electric-indent ()
+  ;; "Custom Electric Indent rules for Splunk mode."
+  ;; (setq-local electric-indent-chars (append electric-indent-chars '(?| ?\[))))
+
+;; (defun splunk--electric-indent ()
+  ;; "Custom electric indent function for Splunk mode."
+  ;; (interactive)
+  ;; (let ((char (char-before)))
+    ;; (if (or (eq char ?|) (eq char ?[))
+        ;; (progn
+          ;; (newline)
+          ;; (indent-according-to-mode))
+      ;; (self-insert-command 1))))
+
+;; (add-hook 'splunk-mode-hook 'electric-indent-mode-hook)
+;; (add-hook 'splunk-mode-hook 'splunk--electric-indent)
+
+;; (defvar splunk-mode-map
+  ;; (let ((m (make-sparse-keymap)))
+    ;; (unless (boundp 'electric-indent-chars)
+      ;; (define-key m "[" #'splunk--insert-open-bracket)
+      ;; (define-key m "|" #'splunk--insert-pipe))
+    ;; m)
+  ;; "Keymap used by ‘splunk-mode’.")
+
+(defun splunk--indent-post-self-insert-function ()
+  ""
+  (when (and electric-indent-mode
+             (eq (char-before) last-command-event))
+    (cond
+     ;; Electric indent inside parens
+     
+    )
+  ))
+
+
+
+;; (defconst splunk-electric-layout-rules
+  ;; (list
+    ;; (cons ?\[ . before)
+  ;; ))
+
+
+
+
 ;;; Mode
 
 ;;;###autoload
@@ -374,9 +529,54 @@
 \\{splunk-mode-map}"
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
-  (setq-local comment-start "//")
+  ;; (setq-local comment-start "//")
   (setq-local indent-line-function 'splunk-indent-line)
+  ;; (electric-indent-local-mode 1)
+    ;; (electric-indent-mode 1)
+  ;; set electric characters
+  ;; (setq-local electric-indent-chars
+  ;; (append "|[]" electric-indent-chars))
+  ;; (setq-local electric-indent-chars (append electric-indent-chars '(?| ?\[))) ;; THIS ONE
+  ;; Auto indent on |
+  ;; (setq-local electric-indent-chars
+              ;; (cons ?| (and (boundp 'electric-indent-chars)
+                            ;; electric-indent-chars)))
+
+
+  
+  ;; (add-hook 'post-self-insert-hook
+            ;; #'splunk--indent-post-self-insert-function 'append 'local)
+
+  ;; (when (boundp 'electric-indent-chars)
+    ;; (set (make-local-variable 'electric-indent-chars) '(?| ?\[))
+    ;; (add-hook 'electric-indent-functions #'splunk--electric-indent-function nil t)
+  ;; )
+  
+  ;; (electric-indent-mode 1)
+  ;; Closing square bracket should re-indent (i.e. unindent) the line
+  ;; FOR electric-indent-mode THIS ONE
+  ;; (when (boundp 'electric-indent-chars)
+    ;; (setq-local electric-indent-chars
+                ;; (append electric-indent-chars '(?|))))
+
+  ;; FOR electric-layout-mode
+  ;; (setq-local electric-layout-rules splunk-electric-layout-rules)
+  ;; requires electric-layout-mode
+  (setq electric-layout-rules '((?\[ . before) (?| . before)))
+  ;; (add-to-list 'electric-layout-rules
+               ;; '((?\[ . before)
+                 ;; (?| . before)))
+
+  (add-to-list 'electric-layout-rules '(?| . before))
+  ;; requires electric-indent-mode
+  (setq-local electric-indent-chars
+              (cons ?\] (and (boundp 'electric-indent-chars)
+                             electric-indent-chars)))
+
   (font-lock-fontify-buffer))
+
+;; (add-hook 'lisp-mode-hook #'(lambda ()
+;; (local-set-key (kbd "RET") 'newline-and-indent)))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.spl\\'" . splunk-mode))
@@ -392,3 +592,17 @@
 ;; End:
 
 ;;; splunk-mode.el ends here
+
+
+
+
+;; (setq electric-layout-rules )
+
+
+
+
+
+
+;; electric-indent-just-newline
+;; electric-layout-rules
+;; electric-pair-mode
