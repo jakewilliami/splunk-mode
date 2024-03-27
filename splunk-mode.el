@@ -315,8 +315,7 @@
                (or "eval" "where" "fieldformat")
                (or (one-or-more space) eol)
                (zero-or-more (not (any "|[")))))
-       (group (regexp (regexp-opt splunk-eval-functions 'words)))
-       )))
+       (group (regexp (regexp-opt splunk-eval-functions 'words))))))
 
 ;; Alternative comment syntax; refs:
 ;;   - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
