@@ -58,8 +58,9 @@
 ;;; Notes:
 ;;
 ;; TODO:
-;;   - if
-;;   - mvindex
+;;   - closing `]' will go back to the start for some reason
+;;   - only highlight transforming and eval functions after parentheses added
+;;   - I need to go through and actually test things at some point, but I should probably prioritise releasing this and doing small touch-ups later
 ;;
 ;; NOTE: Feature possibilities:
 ;;   - Operator highlighting
@@ -305,6 +306,18 @@
             (or (one-or-more digit)
                 (and (optional "\"") (one-or-more (or "*" splunk-word)) (optional "\""))))))
 
+;; Only highlight eval functions in eval blocks
+;; E.g., `eval isLocalAdmin=if(...)'; ref:
+;;   - https://docs.splunk.com/Documentation/Splunk/9.2.0/SearchReference/CommonEvalFunctions
+(defconst splunk-eval-regexp
+  (rx (and
+       (group (and
+               (or "eval" "where" "fieldformat")
+               (or (one-or-more space) eol)
+               (zero-or-more (not (any "|[")))))
+       (group (regexp (regexp-opt splunk-eval-functions 'words)))
+       )))
+
 ;; Alternative comment syntax; refs:
 ;;   - https://docs.splunk.com/Documentation/Splunk/9.1.1/Search/Comments
 ;;   - https://docs.splunk.com/Documentation/SCS/current/Search/Comments
@@ -326,9 +339,12 @@
   (list
    ;; Syntax defined by keyword lists
    (cons (regexp-opt splunk-builtin-functions 'symbols) ''splunk-builtin-functions-face)
-   (cons (regexp-opt splunk-eval-functions 'symbols) ''splunk-eval-functions-face)
    (cons (regexp-opt splunk-transforming-functions 'symbols) ''splunk-transforming-functions-face)
    (cons (regexp-opt splunk-language-constants 'symbols) ''splunk-language-constants-face)
+
+   ;; Eval functions
+   ;; (cons splunk-eval-regexp ''splunk-eval-functions-face)
+   (list splunk-eval-regexp 2 ''splunk-eval-functions-face)
 
    ;; Alternative comment styles
    ;;
