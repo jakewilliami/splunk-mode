@@ -61,6 +61,7 @@
 ;;   - closing `]' will go back to the start for some reason
 ;;   - only highlight transforming and eval functions after parentheses added
 ;;   - I need to go through and actually test things at some point, but I should probably prioritise releasing this and doing small touch-ups later
+;;   - Electric indent mode (see below)
 ;;
 ;; NOTE: Feature possibilities:
 ;;   - Operator highlighting
