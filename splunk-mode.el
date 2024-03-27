@@ -1,6 +1,6 @@
 ;;; splunk-mode.el --- Major Mode for editing Splunk Search Processing Language (SPL) source code -*- lexical-binding: t -*-
 
-;; Copyright (C) 2022–2023 Jake Ireland
+;; Copyright (C) 2022–2024 Jake Ireland
 
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
 ;; URL: https://github.com/jakewilliami/splunk-mode/
