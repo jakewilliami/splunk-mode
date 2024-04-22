@@ -77,6 +77,8 @@
 
 ;;; Main
 
+;;; Code:
+
 (eval-when-compile
   (require 'rx)
   (require 'regexp-opt))
