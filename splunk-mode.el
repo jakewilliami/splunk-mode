@@ -1,12 +1,12 @@
-;;; splunk-mode.el --- Major Mode for editing Splunk Search Processing Language (SPL) source code -*- lexical-binding: t -*-
+;;; splunk-mode.el --- Major Mode for editing Splunk SPL source code -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2022–2024 Jake Ireland
 
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
 ;; URL: https://github.com/jakewilliami/splunk-mode/
-;; Version: 1.0
+;; Version: 1.1
 ;; Keywords: languages splunk mode
-;; Package-Requires: ((emacs "27"))
+;; Package-Requires: ((emacs "27.1"))
 
 ;;; Usage:
 ;;
@@ -83,7 +83,7 @@
 
 (defvar splunk-mode-hook nil)
 
-(defgroup splunk-mode ()
+(defgroup splunk ()
   "Major mode for Splunk SPL code."
   :link '(url-link "https://docs.splunk.com/")
   :version "0.1"
@@ -126,67 +126,67 @@
 (defface splunk-comment-face
   '((t :inherit font-lock-comment-face))
   "Face for alternative comment syntax in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-builtin-functions-face
   '((t :inherit font-lock-builtin-face))
   ;; '((t :inherit font-lock-function-name-face))
   ;; '((t :inherit font-lock-constant-face))
   "Face for builtin functions such as `rename', `table', and `stat' in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-eval-functions-face
   '((t :inherit font-lock-function-name-face))
   ;; '((t :inherit font-lock-keyword-face))
   ;; '((t :inherit font-lock-type-face))
   "Face for eval functions such as `abs' and `mvindex' in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-transforming-functions-face
   '((t :inherit font-lock-function-name-face))
   ;; '((t :inherit font-lock-keyword-face))
   ;; '((t :inherit font-lock-type-face))
   "Face for transforming functions such as `count' and `values' in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-language-constants-face
   '((t :inherit font-lock-constant-face))
   ;; '((t :inherit font-lock-type-face))
   ;; '((t :inherit font-lock-function-name-face))
   "Face for language constants such as `as' and `by' in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-macros-face
   '((t :inherit font-lock-function-name-face))
   ;; '((t :inherit font-lock-keyword-face))
   ;; '((t :inherit font-lock-type-face))
   "Face for macros in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-keyword-face
   '((t :inherit font-lock-variable-name-face))
   ;; '((t :inherit font-lock-constant-face))
   ;; '((t :inherit font-lock-variable-name-face))
   "Face for keywords (e.g. `sourcetype=*') in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-digits-face
   ;; '((t :inherit font-lock-number-face))  ;; Added too recently
   '((t :inherit font-lock-type-face))
   "Face for digits in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-escape-chars-face
   ;; '((t :inherit font-lock-escape-face))  ;; Added too recently
   '((t :inherit font-lock-constant-face))
   "Face for escape characters in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 (defface splunk-operators-face
   '((t :inherit font-lock-builtin-face
        :weight bold))
   "Face for operators in Splunk."
-  :group 'splunk-mode)
+  :group 'splunk)
 
 
 
@@ -375,8 +375,7 @@
   :syntax-table splunk-mode-syntax-table
   (setq-local font-lock-defaults '(splunk-font-lock-keywords))
   (setq-local comment-start "//")
-  (setq-local indent-line-function 'splunk-indent-line)
-  (font-lock-fontify-buffer))
+  (setq-local indent-line-function 'splunk-indent-line))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.spl\\'" . splunk-mode))
