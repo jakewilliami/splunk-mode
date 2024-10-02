@@ -88,7 +88,7 @@
 (defgroup splunk ()
   "Major mode for Splunk SPL code."
   :link '(url-link "https://docs.splunk.com/")
-  :version "0.1"
+  :version "1.1"
   :group 'languages
   :prefix "splunk-")
 
