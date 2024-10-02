@@ -5,7 +5,7 @@
 ;; Author: Jake Ireland <jakewilliami@icloud.com>
 ;; URL: https://github.com/jakewilliami/splunk-mode/
 ;; Version: 1.1
-;; Keywords: languages splunk mode
+;; Keywords: languages splunk mode query
 ;; Package-Requires: ((emacs "27.1"))
 
 ;;; Usage:
