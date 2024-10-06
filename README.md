@@ -25,3 +25,7 @@ To get the latest version of `splunk-mode`, clone this repository and then use:
 (add-to-list 'load-path "<path to splunk mode>")
 (require 'splunk-mode)
 ```
+
+## Citation
+
+If your research depends on `splunk-mode`, please consider giving us a formal citation: [`citation.bib`](./citation.bib).
