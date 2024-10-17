@@ -6,6 +6,10 @@
 
 [Emacs](https://www.gnu.org/software/emacs/) major mode for editing [Splunk SPL](https://splunk.com/) source code.
 
+![example of syntax highlighting with splunk-mode](./assets/screenshot.png "Syntax highlighting with splunk-mode")
+
+See also: [`logscale-mode`](https://github.com/jakewilliami/logscale-mode/).
+
 ## Installation
 
 ### Installing from MELPA
