@@ -8,6 +8,8 @@
 
 ![example of syntax highlighting with splunk-mode](./assets/screenshot.png "Syntax highlighting with splunk-mode")
 
+For interacting with a Splunk server in Emacs, see [`paimon`](https://github.com/r0man/paimon.el/) and [`pepita`](https://github.com/sebasmonia/pepita/).
+
 See also: [`logscale-mode`](https://github.com/jakewilliami/logscale-mode/).
 
 ## Installation
